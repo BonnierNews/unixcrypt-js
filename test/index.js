@@ -1,7 +1,7 @@
 "use strict";
 
 const {expect} = require("chai");
-const {encrypt, verify} = require("../");
+const {encrypt, verify, verifyAsync} = require("../");
 
 /**
  * These tests are copied from the Public Domain reference implementation by Ulrich Drepper
@@ -44,6 +44,15 @@ const tests2 = [
     "$6$rounds=1000$roundstoolow$kUMsbe306n21p9R.FRkW3IGn.S9NPN0x50YhH1xhLsPuWGsUSklZt58jaTfF4ZEQpyUNGc0dqbpBYYBaHHrsX."
   ]
 ];
+
+describe("Async encryption", () => {
+  it("Should pass standard test suite", async () => {
+    const data = tests2[0];
+    const compute = encrypt(data[1], data[0]);
+    expect(compute).to.equal(data[2]);
+    expect(await verifyAsync(data[1], data[2])).to.equal(true);
+  });
+});
 
 describe("Encryption", () => {
   it("Should pass standard test suite", () => {

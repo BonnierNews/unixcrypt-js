@@ -4,9 +4,10 @@
 Object.defineProperty(exports, "__esModule", {value: true});
 const crypto = require("crypto");
 const {Buffer} = require("buffer");
-
+const {Worker, isMainThread, parentPort} = require("worker_threads");
 const HashType = {"5": "sha256", "6": "sha512", sha256: 5, sha512: 6};
 const dictionary = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
 // prettier-ignore
 const shuffleMap = {
     sha256: [
@@ -258,7 +259,6 @@ function encrypt(plaintext, salt) {
   const hash = generateHash(plaintext, conf);
   return `${normalizeSalt(conf)}$${hash}`;
 }
-exports.encrypt = encrypt;
 /**
  * Verify plaintext password against expected hash
  * @param plaintext The plaintext password
@@ -269,5 +269,52 @@ function verify(plaintext, hash) {
   const computedHash = encrypt(plaintext, salt);
   return crypto.timingSafeEqual(Buffer.from(computedHash, "utf8"), Buffer.from(hash, "utf8"));
 }
-exports.verify = verify;
-//# sourceMappingURL=index.js.map
+
+// async worker stuff
+let taskIdCounter = 0;
+let verifyWorker;
+const verifyTasks = new Map();
+
+const createVerifyWorker = () => {
+  verifyWorker = new Worker(__filename);
+
+  // parent code
+  verifyWorker.on("message", ({id, error, res}) => {
+    const {resolve, reject} = verifyTasks.get(id);
+    verifyTasks.delete(id);
+    if (verifyTasks.size === 0) {
+      verifyWorker.unref();
+    }
+    if (error) return reject(new Error(error));
+    return resolve(res);
+  });
+
+  verifyWorker.on("error", (error) => {
+    // Any error here is effectively an equivalent of segfault and have no scope, so we just throw it on callback level
+    throw error;
+  });
+};
+
+function verifyAsync(plaintext, hash) {
+  createVerifyWorker();
+  return new Promise((resolve, reject) => {
+    const id = taskIdCounter++;
+    verifyTasks.set(id, {resolve, reject});
+    verifyWorker.postMessage({id, plaintext, hash});
+  });
+}
+
+if (!isMainThread) {
+  // worker code
+  parentPort.on("message", ({plaintext, hash, id}) => {
+    let error, res;
+    try {
+      res = verify(plaintext, hash);
+    } catch (e) {
+      error = e.message;
+    }
+    parentPort.postMessage({id, error, res});
+  });
+}
+
+if (isMainThread) module.exports = {encrypt, verify, verifyAsync};
