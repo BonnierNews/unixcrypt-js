@@ -1,5 +1,5 @@
 # Unixcrypt for Node.js - JS version
-[![Build Status](https://travis-ci.org/BonnierNews/unixcrypt-js.svg?branch=master)](https://travis-ci.org/BonnierNews/unixcrypt-js)
+[![Build Status](https://travis-ci.com/BonnierNews/unixcrypt-js.svg?branch=master)](https://travis-ci.com/BonnierNews/unixcrypt-js)
 
 A Node.js module for encrypting and verifying passwords according to the SHA-256 and SHA-512 Crypt standard:
 https://www.akkadia.org/drepper/SHA-crypt.txt . Based on the TypeScript package [unixcrypt](https://github.com/markusberg/unixcrypt).
