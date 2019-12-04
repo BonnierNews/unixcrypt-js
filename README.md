@@ -8,7 +8,7 @@ https://www.akkadia.org/drepper/SHA-crypt.txt . Based on the TypeScript package 
 
 This package has no external dependencies. It uses the cryptographic facilities built into Node.js.
 
-For development, there are dependencies on Chai and Mocha.
+For development there are dependencies on Chai and Mocha.
 
 ## Usage
 
@@ -29,5 +29,5 @@ console.log(unixcrypt.verify(plaintextPassword, pwHash))
 The tests are written with [Chai](http://www.chaijs.com/), and [Mocha](https://mochajs.org/).
 
 ```sh
-$ yarn test test
+$ yarn test
 ```
