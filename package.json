@@ -9,7 +9,6 @@
     "type": "git",
     "url": "git+https://github.com/BonnierNews/unixcrypt-js.git"
   },
-  "private": true,
   "keywords": [
     "sha256crypt",
     "sha512crypt",
